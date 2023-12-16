@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import express, { Express } from 'express';
 import createGraphQLServer from './graphql';
+import UserService from './services/UserService';
 
 dotenv.config();
 const app: Express = express();
@@ -16,7 +17,21 @@ const PORT: number = Number(process.env.PORT) || 4000;
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   // apply express middleware to Apollo Server
-  app.use('/graphql', expressMiddleware(server));
+  app.use(
+    '/graphql',
+    expressMiddleware(server, {
+      context: async ({ req }) => {
+        // @ts-ignore
+        try {
+          const token: string = req.headers['token'] as string;
+          const user = await UserService.decodeJWTToken(token);
+          return { user };
+        } catch (error) {
+          return {};
+        }
+      },
+    })
+  );
 
   // test route
   app.get('/', (req, res) => {
