@@ -23,6 +23,15 @@ export default class UserService {
     return user;
   }
 
+  public static async findUserById(id: string) {
+    let user = await prisma.user.findUnique({
+      where: {
+        id: id,
+      },
+    });
+    return user;
+  }
+
   public static async createUser(payload: createUserPayload) {
     try {
       // first trim all whitespaces
@@ -54,7 +63,7 @@ export default class UserService {
       if (user) {
         throw new Error('User already exists');
       }
-      
+
       // if user does not exist, create user
       const salt = await bcrypt.genSalt(10);
       const hashedPass = await bcrypt.hash(payload.password, salt);
@@ -90,5 +99,10 @@ export default class UserService {
       expiresIn: '5m',
     });
     return token;
+  }
+
+  public static async decodeJWTToken(token: string) {
+    const jwtSecret = String(process.env.JWT_SECRET);
+    return Jwt.verify(token, jwtSecret);
   }
 }
