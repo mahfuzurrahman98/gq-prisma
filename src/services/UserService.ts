@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 import Jwt from 'jsonwebtoken';
+import { isValidEmail } from '../helpers';
 import prisma from '../lib/db';
 
 dotenv.config();
@@ -24,11 +25,36 @@ export default class UserService {
 
   public static async createUser(payload: createUserPayload) {
     try {
-      // first check if user already exists
+      // first trim all whitespaces
+      payload.firstName = payload.firstName.trim();
+      payload.lastName = payload.lastName?.trim();
+      payload.email = payload.email.trim();
+      payload.password = payload.password.trim();
+
+      // check all fields are valid
+      if (!payload.firstName) {
+        throw new Error('First name is required');
+      }
+      if (!payload.lastName) {
+        throw new Error('Last name is required');
+      }
+      if (!payload.email) {
+        throw new Error('Email is required');
+      }
+      // check email is valid
+      if (!isValidEmail(payload.email)) {
+        throw new Error('Invalid email');
+      }
+      if (!payload.password) {
+        throw new Error('Password is required');
+      }
+
+      // check if user already exists
       let user = await this.findUserByEmail(payload.email);
       if (user) {
         throw new Error('User already exists');
       }
+      
       // if user does not exist, create user
       const salt = await bcrypt.genSalt(10);
       const hashedPass = await bcrypt.hash(payload.password, salt);
