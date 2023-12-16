@@ -8,6 +8,14 @@ const queries = {
     let token = await UserService.getUserToken(email, password);
     return token;
   },
+  getLoggedInUser: async (_: any, __: any, context: any) => {
+    if (!context.user) {
+      throw new Error('Not logged in');
+    }
+    let id = context.user.id;
+    let user = await UserService.findUserById(id);
+    return user;
+  },
 };
 
 const mutations = {
