@@ -13,7 +13,14 @@ const queries = {
 const mutations = {
   createUser: async (_: any, payload: createUserPayload) => {
     let newUser = await UserService.createUser(payload);
-    return newUser.id;
+    // keep only id, firstName, lastName, email and profileImage  in the response
+    return {
+      id: newUser.id,
+      firstName: newUser.firstName,
+      lastName: newUser.lastName,
+      email: newUser.email,
+      profileImage: newUser.profileImage,
+    };
   },
 };
 
