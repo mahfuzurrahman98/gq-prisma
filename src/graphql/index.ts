@@ -2,6 +2,7 @@ import { ApolloServer } from '@apollo/server';
 import User from './user';
 
 const typeDefs = `
+  ${User.typeDefs}
   type Query {
     ${User.queries}
   }
